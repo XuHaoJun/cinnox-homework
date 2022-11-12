@@ -9,8 +9,9 @@ import (
 )
 
 type LineService struct {
-	appConfig *cnconfig.AppConfig
-	repos     *LineServiceRepos
+	appConfig  *cnconfig.AppConfig
+	repos      *LineServiceRepos
+	lineClient *linebot.Client
 }
 
 type LineServiceRepos struct {
@@ -18,10 +19,11 @@ type LineServiceRepos struct {
 	CnMsg *repository.CinnoxMessageRepository
 }
 
-func NewLineService(appConfig *cnconfig.AppConfig, repos *LineServiceRepos) *LineService {
+func NewLineService(appConfig *cnconfig.AppConfig, repos *LineServiceRepos, lineClient *linebot.Client) *LineService {
 	return &LineService{
-		appConfig: appConfig,
-		repos:     repos,
+		appConfig:  appConfig,
+		repos:      repos,
+		lineClient: lineClient,
 	}
 }
 
@@ -52,6 +54,14 @@ func (svc *LineService) saveMessages(msgEvents []*dto.LineEvent) error {
 			return item.ToCinnoxMessage()
 		})
 	_, err := svc.repos.CnMsg.SaveLineMessages(msgs)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (svc *LineService) BroadcastMessage(messages ...linebot.SendingMessage) error {
+	_, err := svc.lineClient.BroadcastMessage(messages...).Do()
 	if err != nil {
 		return err
 	}

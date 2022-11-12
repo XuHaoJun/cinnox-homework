@@ -5,6 +5,9 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
+	"github.com/line/line-bot-sdk-go/v7/linebot"
 	"github.com/xuhaojun/cinnox-homework/cnconfig"
 	"github.com/xuhaojun/cinnox-homework/controller"
 	"github.com/xuhaojun/cinnox-homework/repository"
@@ -14,9 +17,10 @@ import (
 )
 
 type AppServer struct {
-	AppConfig *cnconfig.AppConfig
-	MgoClient *mongo.Client
-	MgoMainDb *mongo.Database
+	AppConfig  *cnconfig.AppConfig
+	MgoClient  *mongo.Client
+	MgoMainDb  *mongo.Database
+	LineClient *linebot.Client
 }
 
 func NewServer() *AppServer {
@@ -26,10 +30,15 @@ func NewServer() *AppServer {
 		log.Fatalln(err)
 	}
 	mainDb := mgoClient.Database(repository.DbNameMain)
+	lineClient, err := linebot.New(appConfig.LineChannelSecert, appConfig.LineChannelAccessToken)
+	if err != nil {
+		log.Fatalln(err)
+	}
 	return &AppServer{
-		AppConfig: &appConfig,
-		MgoClient: mgoClient,
-		MgoMainDb: mainDb,
+		AppConfig:  &appConfig,
+		MgoClient:  mgoClient,
+		MgoMainDb:  mainDb,
+		LineClient: lineClient,
 	}
 }
 
@@ -49,12 +58,24 @@ func (s *AppServer) Run() {
 	lineSvc := service.NewLineService(s.AppConfig, &service.LineServiceRepos{
 		Event: eventRepo,
 		CnMsg: cnMsgRepo,
-	})
+	}, s.LineClient)
 	lineController := controller.NewLineController(s.AppConfig, lineSvc)
 
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("lineMessageTypeEnum", ValidateEnum)
+	}
 	r := gin.Default()
 	v1 := r.Group("/v1")
 	lineController.AddRoutes(v1)
 
 	r.Run()
+}
+
+type Enum interface {
+	IsValid() bool
+}
+
+func ValidateEnum(fl validator.FieldLevel) bool {
+	value := fl.Field().Interface().(Enum)
+	return value.IsValid()
 }
