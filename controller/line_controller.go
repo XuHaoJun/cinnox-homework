@@ -28,6 +28,8 @@ func (ct *LineController) AddRoutes(v1 *gin.RouterGroup) {
 	v1g := v1.Group("/line")
 	v1g.POST("/webhook", ct.webhook)
 	v1g.POST("/broadcast", ct.broadcast)
+	v1g.GET("/users", ct.getUsers)
+	v1g.GET("/users/:userId/messages", ct.getUserMessages)
 }
 
 func (ct *LineController) webhook(c *gin.Context) {
@@ -65,4 +67,23 @@ func (ct *LineController) broadcast(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, "ok")
+}
+
+func (ct *LineController) getUsers(c *gin.Context) {
+	users, err := ct.lineSvc.GetUsers()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
+	c.JSON(http.StatusOK, users)
+}
+
+func (ct *LineController) getUserMessages(c *gin.Context) {
+	userId := c.Param("userId")
+	users, err := ct.lineSvc.GetUserMessages(userId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
+	c.JSON(http.StatusOK, users)
 }

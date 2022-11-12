@@ -42,7 +42,7 @@ func (e *LineEvent) ToCinnoxMessage() *CinnoxMessage[linebot.Message] {
 		Content:     e.Message,
 		Timestamp:   e.Timestamp,
 		UserId:      e.Source.UserID,
-		EventId:     e.WebhookEventID,
+		EventId:     e.UniqueId,
 		ReplayToken: e.ReplyToken,
 	}
 	return &msg

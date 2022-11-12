@@ -46,18 +46,25 @@ func (s *AppServer) Run() {
 	eventRepo := repository.NewLineEventRepository(s.MgoMainDb)
 	err := eventRepo.CreateIndexes()
 	if err != nil {
-		log.Fatalln("create indexes failed")
+		log.Fatalln("create LineEventRepository indexes failed")
 	}
 
 	cnMsgRepo := repository.NewCinnoxMessageRepository(s.MgoMainDb)
 	err = cnMsgRepo.CreateIndexes()
 	if err != nil {
-		log.Fatalln("create indexes failed")
+		log.Fatalln("create CinnoxMessageRepository indexes failed")
+	}
+
+	luserRepo := repository.NewLineUserRepository(s.MgoMainDb)
+	err = luserRepo.CreateIndexes()
+	if err != nil {
+		log.Fatalln("create LineUser indexes failed")
 	}
 
 	lineSvc := service.NewLineService(s.AppConfig, &service.LineServiceRepos{
-		Event: eventRepo,
-		CnMsg: cnMsgRepo,
+		Event:    eventRepo,
+		CnMsg:    cnMsgRepo,
+		LineUser: luserRepo,
 	}, s.LineClient)
 	lineController := controller.NewLineController(s.AppConfig, lineSvc)
 
