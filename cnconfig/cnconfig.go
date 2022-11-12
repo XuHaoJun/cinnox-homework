@@ -21,6 +21,8 @@ func LoadConfig() AppConfig {
 
 	viper.SetDefault("MONGO_URI", "mongodb://localhost:27017")
 
+	viper.AutomaticEnv()
+
 	var err error
 	err = viper.ReadInConfig()
 	if err != nil {
