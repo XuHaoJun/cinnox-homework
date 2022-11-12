@@ -31,7 +31,7 @@ func (repo *CinnoxMessageRepository) FindByUserId(userId string) ([]*dto.CinnoxM
 		return nil, err
 	}
 
-	var msgs []*dto.CinnoxMessage[map[string]interface{}]
+	msgs := []*dto.CinnoxMessage[map[string]interface{}]{}
 	err = cur.All(context.Background(), &msgs)
 	if err != nil {
 		return nil, err

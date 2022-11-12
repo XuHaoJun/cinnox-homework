@@ -35,7 +35,7 @@ func (repo *LineUserRepository) FindAll() ([]*dto.LineUser, error) {
 		return nil, err
 	}
 
-	var lineUsers []*dto.LineUser
+	lineUsers := []*dto.LineUser{}
 	err = cur.All(context.Background(), &lineUsers)
 	if err != nil {
 		return nil, err
