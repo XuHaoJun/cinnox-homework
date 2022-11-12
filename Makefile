@@ -12,7 +12,7 @@ test:
 	go test ./...
 
 dep:
- go mod download
+	go mod download
 
 dev_env_up:
 	docker compose up -d
