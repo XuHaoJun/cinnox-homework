@@ -1,0 +1,6 @@
+services:
+- type: web
+  name: cinnox-homework
+  env: docker
+  plan: standard
+  autoDeploy: true
