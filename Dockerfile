@@ -19,6 +19,7 @@ FROM alpine:3.15 AS release-stage
 ENV GIN_MODE=release
 
 COPY --from=build-stage /app/.env /.env
+COPY --from=build-stage /app/demo.html /demo.html
 COPY --from=build-stage /app/cinnox-homework /cinnox-homework
 
 EXPOSE 8080

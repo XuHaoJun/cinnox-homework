@@ -72,6 +72,7 @@ func (s *AppServer) Run() {
 		v.RegisterValidation("lineMessageTypeEnum", ValidateEnum)
 	}
 	r := gin.Default()
+	r.StaticFile("/", "./demo.html")
 	v1 := r.Group("/v1")
 	lineController.AddRoutes(v1)
 

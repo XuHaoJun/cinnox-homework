@@ -1,0 +1,71 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <script
+      src="https://unpkg.com/react@18/umd/react.production.min.js"
+      crossorigin
+    ></script>
+    <script
+      src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
+      crossorigin
+    ></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery.json-viewer@1.5.0/json-viewer/jquery.json-viewer.js"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/jquery.json-viewer@1.5.0/json-viewer/jquery.json-viewer.css"
+      type="text/css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <h1>Line Id: @005uvzjz</h1>
+    <h2>Broadcast</h2>
+    <input id="broadcast-input" />
+    <h2>Users</h2>
+    <div id="users"></div>
+    <h2>Random User Message</h2>
+    <div id="user-messages"></div>
+
+    <script type="text/babel">
+      $.fn.enterKey = function (fnc) {
+        return this.each(function () {
+          $(this).keypress(function (ev) {
+            var keycode = ev.keyCode ? ev.keyCode : ev.which;
+            if (keycode == "13") {
+              fnc.call(this, ev);
+            }
+          });
+        });
+      };
+
+      (async () => {
+        $("#broadcast-input").enterKey(async (e) => {
+          const msg = $("#broadcast-input").val();
+          $("#broadcast-input").val("");
+          fetch("/v1/line/broadcast", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              messages: [{ type: "text", text: msg }],
+            }),
+          });
+        });
+
+        const users = await (await fetch("/v1/line/users")).json();
+        $("#users").jsonViewer(users);
+
+        const randomUser = users[Math.floor(Math.random() * users.length)];
+        if (randomUser) {
+          const userMessages = await (
+            await fetch(`/v1/line/users/${randomUser.id}/messages`)
+          ).json();
+          $("#user-messages").jsonViewer(userMessages);
+        }
+      })();
+    </script>
+  </body>
+</html>
