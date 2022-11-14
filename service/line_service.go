@@ -57,7 +57,10 @@ func (svc *LineService) SaveEvents(events []*dto.LineEvent) error {
 			UpdatedAt: now,
 		}
 	})
-	err = svc.saveUsers(lusers)
+	uniqLusers := lo.UniqBy(lusers, func(item *dto.LineUser) string {
+		return item.Id
+	})
+	err = svc.saveUsers(uniqLusers)
 	if err != nil {
 		return err
 	}
